@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.steve.ai.SteveMod;
+import com.steve.ai.config.SteveConfig;
 import com.steve.ai.entity.SteveEntity;
 import com.steve.ai.entity.SteveManager;
 import net.minecraft.commands.CommandSourceStack;
@@ -31,6 +32,19 @@ public class SteveCommands {
                 .then(Commands.argument("name", StringArgumentType.string())
                     .then(Commands.argument("command", StringArgumentType.greedyString())
                         .executes(SteveCommands::tellSteve))))
+            .then(Commands.literal("minemind")
+                .then(Commands.literal("enable")
+                    .then(Commands.argument("name", StringArgumentType.string())
+                        .executes(context -> setMineMindAutonomousMode(context, true))))
+                .then(Commands.literal("disable")
+                    .then(Commands.argument("name", StringArgumentType.string())
+                        .executes(context -> setMineMindAutonomousMode(context, false))))
+                .then(Commands.literal("toggle")
+                    .then(Commands.argument("name", StringArgumentType.string())
+                        .executes(SteveCommands::toggleMineMindAutonomousMode)))
+                .then(Commands.literal("status")
+                    .then(Commands.argument("name", StringArgumentType.string())
+                        .executes(SteveCommands::showMineMindStatus))))
         );
     }
 
@@ -132,5 +146,74 @@ public class SteveCommands {
             return 0;
         }
     }
-}
 
+    private static int setMineMindAutonomousMode(CommandContext<CommandSourceStack> context, boolean enabled) {
+        String name = StringArgumentType.getString(context, "name");
+        CommandSourceStack source = context.getSource();
+        SteveEntity steve = getSteveOrFail(source, name);
+
+        if (steve == null) {
+            return 0;
+        }
+
+        steve.getMineMindState().setAutonomousModeEnabled(enabled);
+        source.sendSuccess(() -> Component.literal(
+            "MineMind autonomous mode " + formatEnabled(enabled) + " for Steve: " + name), true);
+        return 1;
+    }
+
+    private static int toggleMineMindAutonomousMode(CommandContext<CommandSourceStack> context) {
+        String name = StringArgumentType.getString(context, "name");
+        CommandSourceStack source = context.getSource();
+        SteveEntity steve = getSteveOrFail(source, name);
+
+        if (steve == null) {
+            return 0;
+        }
+
+        boolean enabled = steve.getMineMindState().toggleAutonomousMode();
+        source.sendSuccess(() -> Component.literal(
+            "MineMind autonomous mode " + formatEnabled(enabled) + " for Steve: " + name), true);
+        return 1;
+    }
+
+    private static int showMineMindStatus(CommandContext<CommandSourceStack> context) {
+        String name = StringArgumentType.getString(context, "name");
+        CommandSourceStack source = context.getSource();
+        SteveEntity steve = getSteveOrFail(source, name);
+
+        if (steve == null) {
+            return 0;
+        }
+
+        String currentGoal = steve.getActionExecutor().getCurrentGoal();
+        String goalText = currentGoal == null || currentGoal.isBlank() ? "none" : currentGoal;
+        String status = "MineMind status for " + name
+            + ": autonomous=" + formatEnabled(steve.getMineMindState().isAutonomousModeEnabled())
+            + ", chatGuidance=" + formatEnabled(SteveConfig.MINEMIND_CHAT_GUIDANCE_ENABLED.get())
+            + ", community=" + formatEnabled(SteveConfig.MINEMIND_COMMUNITY_MODE_ENABLED.get())
+            + ", longTermMemory=" + formatEnabled(SteveConfig.MINEMIND_LONG_TERM_MEMORY_ENABLED.get())
+            + ", planner=" + (SteveConfig.MINEMIND_USE_LLM_PLANNER.get() ? "llm" : "rules")
+            + ", thinkIntervalTicks=" + SteveConfig.MINEMIND_THINK_INTERVAL_TICKS.get()
+            + ", maxPlanningSteps=" + SteveConfig.MINEMIND_MAX_PLANNING_STEPS.get()
+            + ", currentGoal=" + goalText;
+
+        source.sendSuccess(() -> Component.literal(status), false);
+        return 1;
+    }
+
+    private static SteveEntity getSteveOrFail(CommandSourceStack source, String name) {
+        SteveManager manager = SteveMod.getSteveManager();
+        SteveEntity steve = manager.getSteve(name);
+
+        if (steve == null) {
+            source.sendFailure(Component.literal("Steve not found: " + name));
+        }
+
+        return steve;
+    }
+
+    private static String formatEnabled(boolean enabled) {
+        return enabled ? "enabled" : "disabled";
+    }
+}

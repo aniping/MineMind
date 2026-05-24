@@ -44,6 +44,16 @@ temperature = 0.7
 
 Then spawn a Steve with `/steve spawn Bob` and press K to start giving commands.
 
+MineMind autonomous mode is present as an opt-in control surface on this branch,
+but it is off by default and does not run an autonomous loop yet:
+
+```bash
+/steve minemind enable Bob
+/steve minemind disable Bob
+/steve minemind toggle Bob
+/steve minemind status Bob
+```
+
 ## Usage Examples
 
 ```
@@ -258,7 +268,20 @@ maxTokens = 1000
 apiKey = "AI..."
 model = "gemini-1.5-flash"
 maxTokens = 1000
+
+[minemind]
+autonomousModeDefault = false
+enableChatGuidance = false
+enableCommunityMode = false
+enableLongTermMemory = false
+thinkIntervalTicks = 200
+maxPlanningSteps = 3
+useLlmPlanner = false
 ```
+
+MineMind options are disabled by default so the original Steve command mode and
+GUI task mode keep their current behavior unless you explicitly opt in with the
+config and `/steve minemind ...` commands.
 
 **Performance Tips:**
 - Use Groq for fastest inference (recommended for gameplay)

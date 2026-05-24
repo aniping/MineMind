@@ -12,6 +12,13 @@ public class SteveConfig {
     public static final ForgeConfigSpec.IntValue ACTION_TICK_DELAY;
     public static final ForgeConfigSpec.BooleanValue ENABLE_CHAT_RESPONSES;
     public static final ForgeConfigSpec.IntValue MAX_ACTIVE_STEVES;
+    public static final ForgeConfigSpec.BooleanValue MINEMIND_AUTONOMOUS_MODE_DEFAULT;
+    public static final ForgeConfigSpec.BooleanValue MINEMIND_CHAT_GUIDANCE_ENABLED;
+    public static final ForgeConfigSpec.BooleanValue MINEMIND_COMMUNITY_MODE_ENABLED;
+    public static final ForgeConfigSpec.BooleanValue MINEMIND_LONG_TERM_MEMORY_ENABLED;
+    public static final ForgeConfigSpec.IntValue MINEMIND_THINK_INTERVAL_TICKS;
+    public static final ForgeConfigSpec.IntValue MINEMIND_MAX_PLANNING_STEPS;
+    public static final ForgeConfigSpec.BooleanValue MINEMIND_USE_LLM_PLANNER;
 
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
@@ -60,7 +67,38 @@ public class SteveConfig {
         
         builder.pop();
 
+        builder.comment("MineMind Configuration (all new behavior is disabled by default)").push("minemind");
+
+        MINEMIND_AUTONOMOUS_MODE_DEFAULT = builder
+            .comment("Whether newly spawned Steves start with MineMind autonomous mode enabled")
+            .define("autonomousModeDefault", false);
+
+        MINEMIND_CHAT_GUIDANCE_ENABLED = builder
+            .comment("Allow MineMind chat guidance handling when implemented")
+            .define("enableChatGuidance", false);
+
+        MINEMIND_COMMUNITY_MODE_ENABLED = builder
+            .comment("Allow MineMind multi-agent community behavior when implemented")
+            .define("enableCommunityMode", false);
+
+        MINEMIND_LONG_TERM_MEMORY_ENABLED = builder
+            .comment("Allow MineMind long-term memory persistence when implemented")
+            .define("enableLongTermMemory", false);
+
+        MINEMIND_THINK_INTERVAL_TICKS = builder
+            .comment("Ticks between MineMind autonomous thinking cycles")
+            .defineInRange("thinkIntervalTicks", 200, 20, 72000);
+
+        MINEMIND_MAX_PLANNING_STEPS = builder
+            .comment("Maximum task steps a MineMind planner may emit")
+            .defineInRange("maxPlanningSteps", 3, 1, 20);
+
+        MINEMIND_USE_LLM_PLANNER = builder
+            .comment("Use LLM planning for MineMind autonomous mode instead of rule planning when implemented")
+            .define("useLlmPlanner", false);
+
+        builder.pop();
+
         SPEC = builder.build();
     }
 }
-
