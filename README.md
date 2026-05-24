@@ -146,19 +146,31 @@ Custom overlay GUI activated with K key. Uses Minecraft's Screen class with cust
 
 ## Building from Source
 
-Standard Gradle workflow:
+Steve AI now uses Maven as the primary build workflow for this MineMind
+migration branch. The legacy Gradle files are kept only as migration
+reference material.
 
 ```bash
 git clone https://github.com/YuvDwi/Steve.git
 cd Steve
-./gradlew build
+mvn clean package
 ```
 
-Output JAR will be in `build/libs/`. To test in development:
+Output JAR will be in `target/`:
 
 ```bash
-./gradlew runClient
+target/steve-ai-mod-1.0.0.jar
 ```
+
+The Maven build prepares the Forge/Minecraft compile classpath during the
+build. On the first run it downloads the Minecraft 1.20.1 client/server jars
+and Mojang mappings, caches those downloads under the local Maven repository,
+compiles the mod, processes resources, runs tests, and packages the mod JAR.
+
+ForgeGradle's `runClient`/`runServer` tasks do not have a direct Maven
+replacement in this migration. For in-game testing, build with
+`mvn clean package`, then place the generated JAR in a Minecraft 1.20.1 Forge
+mods directory. The old Gradle wrapper is not the main build entry point.
 
 **Project Structure:**
 ```
@@ -201,7 +213,7 @@ We welcome contributions! Here's how to get started:
 
 3. **Make changes**
    - Follow code style (4-space indent, JavaDoc for public APIs)
-   - Test with `./gradlew build && ./gradlew runClient`
+   - Test with `mvn clean package`
 
 4. **Submit PR**
    - Clear commit messages

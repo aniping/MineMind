@@ -239,7 +239,7 @@ public class BuildStructureAction extends BaseAction {
                         15, 0.4, 0.4, 0.4, 0.15
                     );
                     
-                    var soundType = blockState.getSoundType(steve.level(), pos, steve);
+                    var soundType = blockState.getSoundType();
                     steve.level().playSound(null, pos, soundType.getPlaceSound(), 
                         SoundSource.BLOCKS, 1.0f, soundType.getPitch());
                 }
@@ -508,4 +508,3 @@ public class BuildStructureAction extends BaseAction {
     }
     
 }
-

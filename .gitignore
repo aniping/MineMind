@@ -2,6 +2,7 @@ brain.md
 
 # Build
 build/
+target/
 .gradle/
 bin/
 out/

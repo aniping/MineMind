@@ -1,0 +1,36 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
+  <profiles>
+    <profile>
+      <id>minemind-repositories</id>
+      <repositories>
+        <repository>
+          <id>forge</id>
+          <url>https://maven.minecraftforge.net/</url>
+        </repository>
+        <repository>
+          <id>minecraft-libraries</id>
+          <url>https://libraries.minecraft.net/</url>
+        </repository>
+        <repository>
+          <id>central</id>
+          <url>https://repo.maven.apache.org/maven2</url>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>central</id>
+          <url>https://repo.maven.apache.org/maven2</url>
+        </pluginRepository>
+        <pluginRepository>
+          <id>forge</id>
+          <url>https://maven.minecraftforge.net/</url>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+  </profiles>
+  <activeProfiles>
+    <activeProfile>minemind-repositories</activeProfile>
+  </activeProfiles>
+</settings>
