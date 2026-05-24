@@ -7,6 +7,8 @@ import com.steve.ai.SteveMod;
 import com.steve.ai.config.SteveConfig;
 import com.steve.ai.entity.SteveEntity;
 import com.steve.ai.entity.SteveManager;
+import com.steve.ai.minemind.MineMindGoalPlan;
+import com.steve.ai.minemind.MineMindGoalPlanner;
 import com.steve.ai.minemind.MineMindObservation;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -48,7 +50,10 @@ public class SteveCommands {
                         .executes(SteveCommands::showMineMindStatus)))
                 .then(Commands.literal("observe")
                     .then(Commands.argument("name", StringArgumentType.string())
-                        .executes(SteveCommands::showMineMindObservation))))
+                        .executes(SteveCommands::showMineMindObservation)))
+                .then(Commands.literal("goals")
+                    .then(Commands.argument("name", StringArgumentType.string())
+                        .executes(SteveCommands::showMineMindGoals))))
         );
     }
 
@@ -217,6 +222,21 @@ public class SteveCommands {
 
         MineMindObservation observation = MineMindObservation.capture(steve);
         source.sendSuccess(() -> Component.literal(observation.toCommandSummary()), false);
+        return 1;
+    }
+
+    private static int showMineMindGoals(CommandContext<CommandSourceStack> context) {
+        String name = StringArgumentType.getString(context, "name");
+        CommandSourceStack source = context.getSource();
+        SteveEntity steve = getSteveOrFail(source, name);
+
+        if (steve == null) {
+            return 0;
+        }
+
+        MineMindObservation observation = MineMindObservation.capture(steve);
+        MineMindGoalPlan goalPlan = new MineMindGoalPlanner().plan(observation);
+        source.sendSuccess(() -> Component.literal(goalPlan.toCommandSummary(name)), false);
         return 1;
     }
 

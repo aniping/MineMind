@@ -53,12 +53,18 @@ but it is off by default and does not run an autonomous loop yet:
 /steve minemind toggle Bob
 /steve minemind status Bob
 /steve minemind observe Bob
+/steve minemind goals Bob
 ```
 
 `observe` prints a bounded world snapshot with position, health, dimension,
 time, biome, nearby entities/resources, current goal, current action, and a
 rule-based danger level. It is a debug view only and does not start autonomous
 behavior.
+
+`goals` generates MineMind candidate goals from the current observation and
+shows the selected rule-based goal. It covers survival, resource, growth,
+curiosity, exploration, memory, social, and community goal types, but it is
+still a debug view only and does not enqueue actions yet.
 
 ## Usage Examples
 

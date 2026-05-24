@@ -159,6 +159,54 @@ public class MineMindObservation {
         return dangerLevel;
     }
 
+    public String getSteveName() {
+        return steveName;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public float getHealth() {
+        return health;
+    }
+
+    public float getMaxHealth() {
+        return maxHealth;
+    }
+
+    public String getHunger() {
+        return hunger;
+    }
+
+    public String getDimension() {
+        return dimension;
+    }
+
+    public long getDayTime() {
+        return dayTime;
+    }
+
+    public boolean isNight() {
+        return night;
+    }
+
+    public String getBiome() {
+        return biome;
+    }
+
+    public String getNearbyPlayers() {
+        return nearbyPlayers;
+    }
+
+    public String getFriendlyEntities() {
+        return friendlyEntities;
+    }
+
+    public String getHostileEntities() {
+        return hostileEntities;
+    }
+
     public List<String> getDangerReasons() {
         return dangerReasons;
     }
@@ -169,6 +217,26 @@ public class MineMindObservation {
 
     public String getNearbyResources() {
         return nearbyResources;
+    }
+
+    public String getInventory() {
+        return inventory;
+    }
+
+    public String getCurrentAction() {
+        return currentAction;
+    }
+
+    public int getQueuedTaskCount() {
+        return queuedTaskCount;
+    }
+
+    public String getCurrentGoal() {
+        return currentGoal;
+    }
+
+    public String getRecentFailures() {
+        return recentFailures;
     }
 
     private String formatHealth() {
