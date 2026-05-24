@@ -17,7 +17,8 @@ Success criteria for this stage:
 ## Build Baseline
 
 Steve has been migrated to Maven for this branch. `pom.xml` is the main build
-entry point, with the legacy Gradle files retained only as migration reference.
+entry point. The old Gradle wrapper and Gradle build entry files have been
+removed so new work validates through Maven.
 
 Current Maven flow:
 

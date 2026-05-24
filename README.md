@@ -163,8 +163,8 @@ Custom overlay GUI activated with K key. Uses Minecraft's Screen class with cust
 ## Building from Source
 
 Steve AI now uses Maven as the primary build workflow for this MineMind
-migration branch. The legacy Gradle files are kept only as migration
-reference material.
+migration branch. The old Gradle wrapper and build entry files have been
+removed from the active project.
 
 ```bash
 git clone https://github.com/YuvDwi/Steve.git
@@ -186,7 +186,7 @@ compiles the mod, processes resources, runs tests, and packages the mod JAR.
 ForgeGradle's `runClient`/`runServer` tasks do not have a direct Maven
 replacement in this migration. For in-game testing, build with
 `mvn clean package`, then place the generated JAR in a Minecraft 1.20.1 Forge
-mods directory. The old Gradle wrapper is not the main build entry point.
+mods directory.
 
 **Project Structure:**
 ```
