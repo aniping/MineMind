@@ -52,7 +52,13 @@ but it is off by default and does not run an autonomous loop yet:
 /steve minemind disable Bob
 /steve minemind toggle Bob
 /steve minemind status Bob
+/steve minemind observe Bob
 ```
+
+`observe` prints a bounded world snapshot with position, health, dimension,
+time, biome, nearby entities/resources, current goal, current action, and a
+rule-based danger level. It is a debug view only and does not start autonomous
+behavior.
 
 ## Usage Examples
 

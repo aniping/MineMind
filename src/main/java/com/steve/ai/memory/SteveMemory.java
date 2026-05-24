@@ -15,13 +15,16 @@ public class SteveMemory {
     private String currentGoal;
     private final Queue<String> taskQueue;
     private final LinkedList<String> recentActions;
+    private final LinkedList<String> recentFailures;
     private static final int MAX_RECENT_ACTIONS = 20;
+    private static final int MAX_RECENT_FAILURES = 10;
 
     public SteveMemory(SteveEntity steve) {
         this.steve = steve;
         this.currentGoal = "";
         this.taskQueue = new LinkedList<>();
         this.recentActions = new LinkedList<>();
+        this.recentFailures = new LinkedList<>();
     }
 
     public String getCurrentGoal() {
@@ -39,13 +42,31 @@ public class SteveMemory {
         }
     }
 
+    public void addFailure(String failure) {
+        if (failure == null || failure.isBlank()) {
+            return;
+        }
+
+        recentFailures.addLast(failure);
+        if (recentFailures.size() > MAX_RECENT_FAILURES) {
+            recentFailures.removeFirst();
+        }
+    }
+
     public List<String> getRecentActions(int count) {
-        int size = Math.min(count, recentActions.size());
+        return getRecentEntries(recentActions, count);
+    }
+
+    public List<String> getRecentFailures(int count) {
+        return getRecentEntries(recentFailures, count);
+    }
+
+    private List<String> getRecentEntries(LinkedList<String> entries, int count) {
         List<String> result = new ArrayList<>();
         
-        int startIndex = Math.max(0, recentActions.size() - count);
-        for (int i = startIndex; i < recentActions.size(); i++) {
-            result.add(recentActions.get(i));
+        int startIndex = Math.max(0, entries.size() - count);
+        for (int i = startIndex; i < entries.size(); i++) {
+            result.add(entries.get(i));
         }
         
         return result;
@@ -64,6 +85,12 @@ public class SteveMemory {
             actionsList.add(StringTag.valueOf(action));
         }
         tag.put("RecentActions", actionsList);
+
+        ListTag failuresList = new ListTag();
+        for (String failure : recentFailures) {
+            failuresList.add(StringTag.valueOf(failure));
+        }
+        tag.put("RecentFailures", failuresList);
     }
 
     public void loadFromNBT(CompoundTag tag) {
@@ -78,6 +105,13 @@ public class SteveMemory {
                 recentActions.add(actionsList.getString(i));
             }
         }
+
+        if (tag.contains("RecentFailures")) {
+            recentFailures.clear();
+            ListTag failuresList = tag.getList("RecentFailures", 8); // 8 = String type
+            for (int i = 0; i < failuresList.size(); i++) {
+                recentFailures.add(failuresList.getString(i));
+            }
+        }
     }
 }
-

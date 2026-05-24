@@ -262,6 +262,7 @@ public class ActionExecutor {
                 steve.getMemory().addAction(currentAction.getDescription());
                 
                 if (!result.isSuccess() && result.requiresReplanning()) {
+                    steve.getMemory().addFailure(result.getMessage());
                     // Action failed, need to replan
                     if (SteveConfig.ENABLE_CHAT_RESPONSES.get()) {
                         sendToGUI(steve.getSteveName(), "Problem: " + result.getMessage());
@@ -405,6 +406,22 @@ public class ActionExecutor {
         return currentGoal;
     }
 
+    public String getCurrentActionDescription() {
+        if (currentAction != null) {
+            return currentAction.getDescription();
+        }
+
+        if (idleFollowAction != null) {
+            return idleFollowAction.getDescription();
+        }
+
+        return "none";
+    }
+
+    public int getQueuedTaskCount() {
+        return taskQueue.size();
+    }
+
     /**
      * Returns the event bus for subscribing to action events.
      *
@@ -450,4 +467,3 @@ public class ActionExecutor {
         return isPlanning;
     }
 }
-

@@ -7,6 +7,7 @@ import com.steve.ai.SteveMod;
 import com.steve.ai.config.SteveConfig;
 import com.steve.ai.entity.SteveEntity;
 import com.steve.ai.entity.SteveManager;
+import com.steve.ai.minemind.MineMindObservation;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -44,7 +45,10 @@ public class SteveCommands {
                         .executes(SteveCommands::toggleMineMindAutonomousMode)))
                 .then(Commands.literal("status")
                     .then(Commands.argument("name", StringArgumentType.string())
-                        .executes(SteveCommands::showMineMindStatus))))
+                        .executes(SteveCommands::showMineMindStatus)))
+                .then(Commands.literal("observe")
+                    .then(Commands.argument("name", StringArgumentType.string())
+                        .executes(SteveCommands::showMineMindObservation))))
         );
     }
 
@@ -199,6 +203,20 @@ public class SteveCommands {
             + ", currentGoal=" + goalText;
 
         source.sendSuccess(() -> Component.literal(status), false);
+        return 1;
+    }
+
+    private static int showMineMindObservation(CommandContext<CommandSourceStack> context) {
+        String name = StringArgumentType.getString(context, "name");
+        CommandSourceStack source = context.getSource();
+        SteveEntity steve = getSteveOrFail(source, name);
+
+        if (steve == null) {
+            return 0;
+        }
+
+        MineMindObservation observation = MineMindObservation.capture(steve);
+        source.sendSuccess(() -> Component.literal(observation.toCommandSummary()), false);
         return 1;
     }
 
