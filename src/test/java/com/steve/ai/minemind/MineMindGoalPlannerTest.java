@@ -107,6 +107,27 @@ class MineMindGoalPlannerTest {
             .anyMatch(goal -> goal.getType() == MineMindGoal.Type.COMMUNITY));
     }
 
+    @Test
+    void playerGuidanceAddsHighPrioritySocialGoal() {
+        MineMindGoalPlan plan = new MineMindGoalPlanner().plan(new MineMindGoalPlanner.ObservationFacts(
+            20.0f,
+            20.0f,
+            "not_applicable",
+            false,
+            "minecraft:plains",
+            "none",
+            "none",
+            "none",
+            "main=minecraft:stone_pickaxex1",
+            "none",
+            "none",
+            "Player: prioritize finding a village",
+            MineMindObservation.DangerLevel.LOW,
+            false));
+
+        assertEquals("follow_player_guidance", plan.getSelectedGoal().getId());
+    }
+
     private static MineMindGoalPlanner.ObservationFacts facts(
             float health,
             float maxHealth,
@@ -129,6 +150,7 @@ class MineMindGoalPlannerTest {
             inventory,
             "none",
             recentFailures,
+            "none",
             dangerLevel,
             communityModeEnabled);
     }

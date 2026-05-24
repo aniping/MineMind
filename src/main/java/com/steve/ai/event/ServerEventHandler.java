@@ -4,9 +4,11 @@ import com.steve.ai.SteveMod;
 import com.steve.ai.entity.SteveEntity;
 import com.steve.ai.entity.SteveManager;
 import com.steve.ai.memory.StructureRegistry;
+import com.steve.ai.minemind.MineMindChatHandler;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -59,5 +61,9 @@ public class ServerEventHandler {
     public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
         stevesSpawned = false;
     }
-}
 
+    @SubscribeEvent
+    public static void onServerChat(ServerChatEvent event) {
+        MineMindChatHandler.handle(event.getPlayer(), event.getRawText());
+    }
+}

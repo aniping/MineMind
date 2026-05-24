@@ -19,6 +19,7 @@ public class SteveConfig {
     public static final ForgeConfigSpec.IntValue MINEMIND_THINK_INTERVAL_TICKS;
     public static final ForgeConfigSpec.IntValue MINEMIND_MAX_PLANNING_STEPS;
     public static final ForgeConfigSpec.BooleanValue MINEMIND_USE_LLM_PLANNER;
+    public static final ForgeConfigSpec.IntValue MINEMIND_CHAT_RESPONSE_COOLDOWN_TICKS;
 
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
@@ -96,6 +97,10 @@ public class SteveConfig {
         MINEMIND_USE_LLM_PLANNER = builder
             .comment("Use LLM planning for MineMind autonomous mode instead of rule planning when implemented")
             .define("useLlmPlanner", false);
+
+        MINEMIND_CHAT_RESPONSE_COOLDOWN_TICKS = builder
+            .comment("Minimum ticks between MineMind chat replies from the same Steve")
+            .defineInRange("chatResponseCooldownTicks", 100, 20, 72000);
 
         builder.pop();
 

@@ -47,6 +47,7 @@ public class MineMindObservation {
     private final int queuedTaskCount;
     private final String currentGoal;
     private final String recentFailures;
+    private final String recentPlayerGuidance;
     private final DangerLevel dangerLevel;
     private final List<String> dangerReasons;
 
@@ -70,6 +71,7 @@ public class MineMindObservation {
             int queuedTaskCount,
             String currentGoal,
             String recentFailures,
+            String recentPlayerGuidance,
             DangerLevel dangerLevel,
             List<String> dangerReasons) {
         this.steveName = steveName;
@@ -91,6 +93,7 @@ public class MineMindObservation {
         this.queuedTaskCount = queuedTaskCount;
         this.currentGoal = currentGoal;
         this.recentFailures = recentFailures;
+        this.recentPlayerGuidance = recentPlayerGuidance;
         this.dangerLevel = dangerLevel;
         this.dangerReasons = List.copyOf(dangerReasons);
     }
@@ -130,6 +133,7 @@ public class MineMindObservation {
             steve.getActionExecutor().getQueuedTaskCount(),
             currentGoal,
             summarizeList(steve.getMemory().getRecentFailures(3)),
+            summarizeList(steve.getMemory().getRecentPlayerGuidance(3)),
             danger.level(),
             danger.reasons()
         );
@@ -155,6 +159,7 @@ public class MineMindObservation {
             int queuedTaskCount,
             String currentGoal,
             String recentFailures,
+            String recentPlayerGuidance,
             DangerLevel dangerLevel,
             List<String> dangerReasons) {
         return new MineMindObservation(
@@ -177,6 +182,7 @@ public class MineMindObservation {
             queuedTaskCount,
             currentGoal,
             recentFailures,
+            recentPlayerGuidance,
             dangerLevel,
             dangerReasons);
     }
@@ -198,7 +204,8 @@ public class MineMindObservation {
             + ", action=" + currentAction
             + ", queuedTasks=" + queuedTaskCount
             + ", goal=" + currentGoal
-            + ", failures=" + recentFailures;
+            + ", failures=" + recentFailures
+            + ", guidance=" + recentPlayerGuidance;
     }
 
     public String toMemorySummary() {
@@ -208,7 +215,8 @@ public class MineMindObservation {
             + ", biome=" + biome
             + ", danger=" + dangerLevel
             + ", resources=" + nearbyResources
-            + ", goal=" + currentGoal;
+            + ", goal=" + currentGoal
+            + ", guidance=" + recentPlayerGuidance;
     }
 
     public DangerLevel getDangerLevel() {
@@ -293,6 +301,10 @@ public class MineMindObservation {
 
     public String getRecentFailures() {
         return recentFailures;
+    }
+
+    public String getRecentPlayerGuidance() {
+        return recentPlayerGuidance;
     }
 
     private String formatHealth() {

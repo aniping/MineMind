@@ -19,6 +19,7 @@ public class MineMindGoalPlanner {
         addGrowthGoals(candidates, facts);
         addCuriosityGoals(candidates, facts);
         addSocialGoals(candidates, facts);
+        addPlayerGuidanceGoals(candidates, facts);
         addCommunityGoals(candidates, facts);
         addExplorationGoals(candidates, facts);
         addMemoryGoals(candidates, facts);
@@ -110,6 +111,15 @@ public class MineMindGoalPlanner {
         }
     }
 
+    private void addPlayerGuidanceGoals(List<MineMindGoal> candidates, ObservationFacts facts) {
+        if (!isPresent(facts.playerGuidance())) {
+            return;
+        }
+
+        addGoal(candidates, facts, "follow_player_guidance", MineMindGoal.Type.SOCIAL, 72,
+            "follow recent player guidance", "recent chat guidance should shape autonomous choices");
+    }
+
     private void addCommunityGoals(List<MineMindGoal> candidates, ObservationFacts facts) {
         if (!facts.communityModeEnabled()) {
             return;
@@ -155,6 +165,7 @@ public class MineMindGoalPlanner {
         int priority = goal.getPriority();
         String currentGoal = normalize(facts.currentGoal());
         String recentFailures = normalize(facts.recentFailures());
+        String playerGuidance = normalize(facts.playerGuidance());
         String id = normalize(goal.getId());
         String title = normalize(goal.getTitle());
         String type = normalize(goal.getType().name());
@@ -165,6 +176,10 @@ public class MineMindGoalPlanner {
 
         if (containsGoalSignal(recentFailures, id, title, type)) {
             priority -= 25;
+        }
+
+        if (containsGoalSignal(playerGuidance, id, title, type)) {
+            priority += 10;
         }
 
         return Math.max(1, priority);
@@ -209,6 +224,7 @@ public class MineMindGoalPlanner {
         String inventory,
         String currentGoal,
         String recentFailures,
+        String playerGuidance,
         MineMindObservation.DangerLevel dangerLevel,
         boolean communityModeEnabled) {
 
@@ -225,6 +241,7 @@ public class MineMindGoalPlanner {
                 observation.getInventory(),
                 observation.getCurrentGoal(),
                 observation.getRecentFailures(),
+                observation.getRecentPlayerGuidance(),
                 observation.getDangerLevel(),
                 communityModeEnabled);
         }

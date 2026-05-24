@@ -54,12 +54,43 @@ Maven is the sole build path in this branch.
 
 ## Run In Minecraft
 
+### Client Smoke Test
+
 1. Build with `mvn clean package`.
 2. Copy `target/steve-ai-mod-1.0.0.jar` into a Minecraft 1.20.1 Forge `mods`
    directory.
 3. Launch Minecraft with the Forge profile.
 4. Configure `config/steve-common.toml` after Forge generates it, or copy and
    adapt `config/steve-common.toml.example`.
+5. Create or open a world, then run the basic commands below.
+
+### Dedicated Server Smoke Test
+
+Use a Forge server that matches the mod target: Minecraft `1.20.1`, Forge
+`47.2.0`.
+
+1. Build with `mvn clean package`.
+2. Install a Forge `1.20.1-47.2.0` dedicated server in a separate run
+   directory.
+3. Accept the Minecraft EULA for that server directory.
+4. Copy `target/steve-ai-mod-1.0.0.jar` into the server `mods` directory.
+5. Copy or adapt `config/steve-common.toml.example` into the server `config`
+   directory.
+6. Start the server from the Forge server directory:
+
+```powershell
+.\run.bat --nogui
+```
+
+If the Forge installer did not create `run.bat`, use the generated Forge args
+file instead:
+
+```powershell
+java @user_jvm_args.txt @libraries/net/minecraftforge/forge/1.20.1-47.2.0/win_args.txt nogui
+```
+
+Then join the server from a Minecraft 1.20.1 Forge client with the same mod JAR
+installed.
 
 ## Basic Commands
 
@@ -99,6 +130,25 @@ When autonomous mode is enabled, the tick loop only runs while the existing
 `ActionExecutor` is idle. It does not call an LLM, does not block the Minecraft
 main thread with network requests, and does not spam chat.
 
+If `enableChatGuidance` is true, players can address a Steve by name in normal
+Minecraft chat:
+
+```text
+Bob, what are you doing?
+Bob, why are you doing that?
+Bob, next plan?
+Bob, remember this is the base
+Bob, don't go east
+Bob, stop
+Bob, continue autonomous exploration
+Bob, gather wood
+```
+
+Common questions are answered with rule-based replies. Guidance such as marked
+locations, preferences, danger warnings, and avoid-direction notes is written to
+Steve memory and can influence later MineMind goal selection. Clear task-like
+messages reuse the existing non-blocking natural language task planner.
+
 ## Configuration
 
 Example:
@@ -126,6 +176,7 @@ enableLongTermMemory = false
 thinkIntervalTicks = 200
 maxPlanningSteps = 3
 useLlmPlanner = false
+chatResponseCooldownTicks = 100
 ```
 
 All MineMind options default to disabled or rule-based behavior so existing
@@ -167,6 +218,28 @@ mvn clean package
 ```
 
 The build must produce `target/steve-ai-mod-1.0.0.jar`.
+
+The Maven gate verifies compilation, resources, tests, Forge/Minecraft
+classpath preparation, and JAR packaging. A live in-game smoke test is separate:
+start a Forge client or dedicated server, join the world, spawn a Steve, and run
+the commands in the next checklist.
+
+Runtime smoke checklist:
+
+```bash
+/steve spawn Bob
+/steve list
+/steve minemind status Bob
+/steve minemind observe Bob
+/steve minemind goals Bob
+/steve minemind enable Bob
+/steve minemind disable Bob
+/steve stop Bob
+```
+
+Expected result: the commands return without server errors, `observe` and
+`goals` print summaries, and enabling MineMind only starts autonomous behavior
+when Bob is idle.
 
 ## Roadmap
 

@@ -28,6 +28,7 @@ public class MineMindRuleTaskPlanner {
                 List.of(pathfindTask(originX + 12, originY, originZ + 4));
             case "develop_basic_tools" -> List.of(mineTask("stone", 4));
             case "check_player_context" -> List.of(followTask("me"));
+            case "follow_player_guidance" -> waitTasks(SHORT_WAIT_TICKS);
             default -> waitTasks(SHORT_WAIT_TICKS);
         };
     }

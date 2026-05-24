@@ -47,4 +47,18 @@ class SteveMemoryTest {
 
         assertEquals(List.of("pos=0,64,0, danger=LOW"), loaded.getRecentObservations(3));
     }
+
+    @Test
+    void savesAndLoadsPlayerGuidance() {
+        SteveMemory memory = new SteveMemory(null);
+        memory.addPlayerGuidance("Player: avoid east");
+
+        CompoundTag tag = new CompoundTag();
+        memory.saveToNBT(tag);
+
+        SteveMemory loaded = new SteveMemory(null);
+        loaded.loadFromNBT(tag);
+
+        assertEquals(List.of("Player: avoid east"), loaded.getRecentPlayerGuidance(3));
+    }
 }

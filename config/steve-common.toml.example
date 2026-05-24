@@ -40,3 +40,6 @@
 
     # Keep false until the safe LLM planner phase is implemented
     useLlmPlanner = false
+
+    # Minimum ticks between MineMind chat replies from the same Steve
+    chatResponseCooldownTicks = 100

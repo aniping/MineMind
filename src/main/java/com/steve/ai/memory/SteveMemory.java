@@ -17,9 +17,11 @@ public class SteveMemory {
     private final LinkedList<String> recentActions;
     private final LinkedList<String> recentFailures;
     private final LinkedList<String> recentObservations;
+    private final LinkedList<String> recentPlayerGuidance;
     private static final int MAX_RECENT_ACTIONS = 20;
     private static final int MAX_RECENT_FAILURES = 10;
     private static final int MAX_RECENT_OBSERVATIONS = 10;
+    private static final int MAX_RECENT_PLAYER_GUIDANCE = 10;
 
     public SteveMemory(SteveEntity steve) {
         this.steve = steve;
@@ -28,6 +30,7 @@ public class SteveMemory {
         this.recentActions = new LinkedList<>();
         this.recentFailures = new LinkedList<>();
         this.recentObservations = new LinkedList<>();
+        this.recentPlayerGuidance = new LinkedList<>();
     }
 
     public String getCurrentGoal() {
@@ -67,6 +70,17 @@ public class SteveMemory {
         }
     }
 
+    public void addPlayerGuidance(String guidance) {
+        if (guidance == null || guidance.isBlank()) {
+            return;
+        }
+
+        recentPlayerGuidance.addLast(guidance);
+        if (recentPlayerGuidance.size() > MAX_RECENT_PLAYER_GUIDANCE) {
+            recentPlayerGuidance.removeFirst();
+        }
+    }
+
     public List<String> getRecentActions(int count) {
         return getRecentEntries(recentActions, count);
     }
@@ -77,6 +91,10 @@ public class SteveMemory {
 
     public List<String> getRecentObservations(int count) {
         return getRecentEntries(recentObservations, count);
+    }
+
+    public List<String> getRecentPlayerGuidance(int count) {
+        return getRecentEntries(recentPlayerGuidance, count);
     }
 
     private List<String> getRecentEntries(LinkedList<String> entries, int count) {
@@ -115,6 +133,12 @@ public class SteveMemory {
             observationsList.add(StringTag.valueOf(observation));
         }
         tag.put("RecentObservations", observationsList);
+
+        ListTag guidanceList = new ListTag();
+        for (String guidance : recentPlayerGuidance) {
+            guidanceList.add(StringTag.valueOf(guidance));
+        }
+        tag.put("RecentPlayerGuidance", guidanceList);
     }
 
     public void loadFromNBT(CompoundTag tag) {
@@ -143,6 +167,14 @@ public class SteveMemory {
             ListTag observationsList = tag.getList("RecentObservations", 8); // 8 = String type
             for (int i = 0; i < observationsList.size(); i++) {
                 recentObservations.add(observationsList.getString(i));
+            }
+        }
+
+        if (tag.contains("RecentPlayerGuidance")) {
+            recentPlayerGuidance.clear();
+            ListTag guidanceList = tag.getList("RecentPlayerGuidance", 8); // 8 = String type
+            for (int i = 0; i < guidanceList.size(); i++) {
+                recentPlayerGuidance.add(guidanceList.getString(i));
             }
         }
     }

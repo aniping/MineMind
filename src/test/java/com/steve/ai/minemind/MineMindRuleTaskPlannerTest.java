@@ -93,6 +93,7 @@ class MineMindRuleTaskPlannerTest {
             0,
             "none",
             "none",
+            "none",
             MineMindObservation.DangerLevel.LOW,
             List.of("stable"));
     }
