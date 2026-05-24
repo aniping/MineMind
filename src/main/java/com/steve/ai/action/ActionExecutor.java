@@ -14,6 +14,7 @@ import com.steve.ai.entity.SteveEntity;
 import com.steve.ai.plugin.ActionRegistry;
 import com.steve.ai.plugin.PluginManager;
 
+import java.util.List;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -368,6 +369,7 @@ public class ActionExecutor {
     private BaseAction createActionLegacy(Task task) {
         return switch (task.getAction()) {
             case "pathfind" -> new PathfindAction(steve, task);
+            case "wait" -> new WaitAction(steve, task);
             case "mine" -> new MineBlockAction(steve, task);
             case "place" -> new PlaceBlockAction(steve, task);
             case "craft" -> new CraftItemAction(steve, task);
@@ -396,6 +398,30 @@ public class ActionExecutor {
 
         // Reset state machine
         stateMachine.reset();
+    }
+
+    public boolean canAcceptAutonomousTasks() {
+        return !isPlanning && currentAction == null && taskQueue.isEmpty();
+    }
+
+    public boolean submitAutonomousTasks(String goal, List<Task> tasks) {
+        if (!canAcceptAutonomousTasks() || tasks == null || tasks.isEmpty()) {
+            return false;
+        }
+
+        if (idleFollowAction != null) {
+            idleFollowAction.cancel();
+            idleFollowAction = null;
+        }
+
+        currentGoal = goal;
+        steve.getMemory().setCurrentGoal(goal);
+        taskQueue.clear();
+        taskQueue.addAll(tasks);
+        ticksSinceLastAction = SteveConfig.ACTION_TICK_DELAY.get();
+        SteveMod.LOGGER.info("Steve '{}' queued {} MineMind autonomous task(s) for goal: {}",
+            steve.getSteveName(), taskQueue.size(), goal);
+        return true;
     }
 
     public boolean isExecuting() {

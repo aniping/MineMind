@@ -16,8 +16,10 @@ public class SteveMemory {
     private final Queue<String> taskQueue;
     private final LinkedList<String> recentActions;
     private final LinkedList<String> recentFailures;
+    private final LinkedList<String> recentObservations;
     private static final int MAX_RECENT_ACTIONS = 20;
     private static final int MAX_RECENT_FAILURES = 10;
+    private static final int MAX_RECENT_OBSERVATIONS = 10;
 
     public SteveMemory(SteveEntity steve) {
         this.steve = steve;
@@ -25,6 +27,7 @@ public class SteveMemory {
         this.taskQueue = new LinkedList<>();
         this.recentActions = new LinkedList<>();
         this.recentFailures = new LinkedList<>();
+        this.recentObservations = new LinkedList<>();
     }
 
     public String getCurrentGoal() {
@@ -53,12 +56,27 @@ public class SteveMemory {
         }
     }
 
+    public void addObservation(String observation) {
+        if (observation == null || observation.isBlank()) {
+            return;
+        }
+
+        recentObservations.addLast(observation);
+        if (recentObservations.size() > MAX_RECENT_OBSERVATIONS) {
+            recentObservations.removeFirst();
+        }
+    }
+
     public List<String> getRecentActions(int count) {
         return getRecentEntries(recentActions, count);
     }
 
     public List<String> getRecentFailures(int count) {
         return getRecentEntries(recentFailures, count);
+    }
+
+    public List<String> getRecentObservations(int count) {
+        return getRecentEntries(recentObservations, count);
     }
 
     private List<String> getRecentEntries(LinkedList<String> entries, int count) {
@@ -91,6 +109,12 @@ public class SteveMemory {
             failuresList.add(StringTag.valueOf(failure));
         }
         tag.put("RecentFailures", failuresList);
+
+        ListTag observationsList = new ListTag();
+        for (String observation : recentObservations) {
+            observationsList.add(StringTag.valueOf(observation));
+        }
+        tag.put("RecentObservations", observationsList);
     }
 
     public void loadFromNBT(CompoundTag tag) {
@@ -111,6 +135,14 @@ public class SteveMemory {
             ListTag failuresList = tag.getList("RecentFailures", 8); // 8 = String type
             for (int i = 0; i < failuresList.size(); i++) {
                 recentFailures.add(failuresList.getString(i));
+            }
+        }
+
+        if (tag.contains("RecentObservations")) {
+            recentObservations.clear();
+            ListTag observationsList = tag.getList("RecentObservations", 8); // 8 = String type
+            for (int i = 0; i < observationsList.size(); i++) {
+                recentObservations.add(observationsList.getString(i));
             }
         }
     }

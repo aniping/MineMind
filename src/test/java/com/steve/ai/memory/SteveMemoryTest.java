@@ -33,4 +33,18 @@ class SteveMemoryTest {
 
         assertEquals(List.of("build failed"), loaded.getRecentFailures(3));
     }
+
+    @Test
+    void savesAndLoadsRecentObservations() {
+        SteveMemory memory = new SteveMemory(null);
+        memory.addObservation("pos=0,64,0, danger=LOW");
+
+        CompoundTag tag = new CompoundTag();
+        memory.saveToNBT(tag);
+
+        SteveMemory loaded = new SteveMemory(null);
+        loaded.loadFromNBT(tag);
+
+        assertEquals(List.of("pos=0,64,0, danger=LOW"), loaded.getRecentObservations(3));
+    }
 }

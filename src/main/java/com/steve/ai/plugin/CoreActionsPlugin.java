@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
  * <p><b>Registered Actions:</b></p>
  * <ul>
  *   <li><b>pathfind</b>: Navigate to coordinates (x, y, z)</li>
+ *   <li><b>wait</b>: Hold position for a bounded number of ticks</li>
  *   <li><b>mine</b>: Mine blocks (block type, quantity)</li>
  *   <li><b>place</b>: Place blocks at coordinates</li>
  *   <li><b>craft</b>: Craft items (item, quantity)</li>
@@ -48,6 +49,10 @@ public class CoreActionsPlugin implements ActionPlugin {
         // Navigation
         registry.register("pathfind",
             (steve, task, ctx) -> new PathfindAction(steve, task),
+            priority, PLUGIN_ID);
+
+        registry.register("wait",
+            (steve, task, ctx) -> new WaitAction(steve, task),
             priority, PLUGIN_ID);
 
         // Resource gathering

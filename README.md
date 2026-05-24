@@ -1,51 +1,82 @@
-# Steve AI - Autonomous AI Agent for Minecraft
+# MineMind
 
-We built Cursor for Minecraft. Instead of AI that helps you write code, you get AI agents that actually play the game with you.
+MineMind is a phased Maven migration and extension of the original Steve
+Minecraft Forge mod. The original Steve command mode, GUI task input, natural
+language planning, action system, memory, and multi-Steve collaboration remain
+in place while MineMind adds opt-in autonomous agent behavior.
 
-https://github.com/user-attachments/assets/23f0ccdd-7a7a-4d49-9dd9-215ebf67265a
+Current MineMind status:
 
-## What It Does
+- Maven is the only active build entry point.
+- Legacy Gradle wrapper and Gradle build files have been removed.
+- Original `/steve` commands still work.
+- The K-key GUI still sends natural language tasks through the existing LLM
+  task planner.
+- MineMind autonomous features are disabled by default.
+- A single Steve can be enabled for low-frequency rule-based autonomy.
+- The current autonomous loop observes the world, records a bounded memory
+  summary, selects a rule goal, converts it to existing Steve tasks, and falls
+  back to a bounded wait task when no safe task is available.
+- DeepSeek and LLM-based MineMind planning are planned later phases and are not
+  required for the current rule-based autonomous loop.
 
-Steve acts as an Agent, or a series of Agents if you choose to employ all of them. You describe what you want, and he understands the context and executes. Same concept here, except instead of code editing, you get embodied Steves that operate in your Minecraft world.
+## Requirements
 
-The interface is simple: press K to open a panel, type what you need. The agents handle the interpretation, planning, and execution. Say "mine some iron" and the agent reasons about where iron spawns, navigates to the appropriate depth, locates ore veins, and extracts the resources. Ask for a house and it considers the available materials, generates an appropriate structure, and builds it block by block.
-
-What makes this interesting is the multi-agent coordination. When multiple Steves work on the same task, they don't just independently execute, they actively coordinate to avoid conflicts and optimize workload distribution. Tell three agents to build a castle and they'll automatically partition the structure, divide sections among themselves, and parallelize the construction.
-
-The agents aren't following predefined scripts. They're operating off natural language instructions, which means:
-- **Resource extraction** where agents determine optimal mining locations and strategies
-- **Autonomous building** with agents planning layouts and material usage
-- **Combat and defense** where agents assess threats and coordinate responses
-- **Exploration and gathering** with pathfinding and resource location
-- **Collaborative execution** with automatic workload balancing and conflict resolution
-
-## Quick Start
-
-**You need:**
 - Minecraft 1.20.1 with Forge
 - Java 17
-- An OpenAI API key (or Groq/Gemini if you prefer)
+- Maven
+- An LLM API key only if you use the original natural language command or GUI
+  task mode
 
-**Installation:**
-1. Download the JAR from releases
-2. Put it in your `mods` folder
-3. Launch Minecraft
-4. Copy `config/steve-common.toml.example` to `config/steve-common.toml`
-5. Add your API key to the config
+Do not commit API keys. Keep keys in local config or pass them at runtime.
 
-**Config example:**
-```toml
-[openai]
-apiKey = "your-api-key-here"
-model = "gpt-3.5-turbo"
-maxTokens = 1000
-temperature = 0.7
+## Build
+
+From the project root:
+
+```bash
+mvn clean package
 ```
 
-Then spawn a Steve with `/steve spawn Bob` and press K to start giving commands.
+The packaged mod JAR is written to:
 
-MineMind autonomous mode is present as an opt-in control surface on this branch,
-but it is off by default and does not run an autonomous loop yet:
+```bash
+target/steve-ai-mod-1.0.0.jar
+```
+
+The Maven build compiles Java sources, prepares the Forge/Minecraft compile
+classpath, processes resources, runs tests, and packages the mod JAR. On a
+fresh machine it may download Minecraft 1.20.1 client/server artifacts, Mojang
+mappings, Forge helper tools, and Maven dependencies into the local Maven
+repository.
+
+Maven is the sole build path in this branch.
+
+## Run In Minecraft
+
+1. Build with `mvn clean package`.
+2. Copy `target/steve-ai-mod-1.0.0.jar` into a Minecraft 1.20.1 Forge `mods`
+   directory.
+3. Launch Minecraft with the Forge profile.
+4. Configure `config/steve-common.toml` after Forge generates it, or copy and
+   adapt `config/steve-common.toml.example`.
+
+## Basic Commands
+
+```bash
+/steve spawn Bob
+/steve list
+/steve tell Bob mine 20 iron ore
+/steve stop Bob
+/steve remove Bob
+```
+
+Press `K` in-game to open the existing Steve GUI and submit natural language
+tasks.
+
+## MineMind Commands
+
+MineMind autonomous behavior is opt-in per Steve:
 
 ```bash
 /steve minemind enable Bob
@@ -57,229 +88,35 @@ but it is off by default and does not run an autonomous loop yet:
 ```
 
 `observe` prints a bounded world snapshot with position, health, dimension,
-time, biome, nearby entities/resources, current goal, current action, and a
-rule-based danger level. It is a debug view only and does not start autonomous
-behavior.
+time, biome, nearby entities/resources, current goal, current action, recent
+failures, and a rule-based danger level.
 
 `goals` generates MineMind candidate goals from the current observation and
-shows the selected rule-based goal. It covers survival, resource, growth,
-curiosity, exploration, memory, social, and community goal types, but it is
-still a debug view only and does not enqueue actions yet.
+shows the selected rule-based goal. The command itself is a debug view and does
+not enqueue actions.
 
-## Usage Examples
-
-```
-"mine 20 iron ore"
-"build a house near me"
-"help Alex with the tower"
-"defend me from zombies"
-"follow me"
-"gather wood from that forest"
-"make a cobblestone platform here"
-"attack that creeper"
-```
-
-The agents are pretty good at figuring out what you mean. You don't need to be super specific.
-
-## Technical Architecture
-
-### System Overview
-
-Each Steve runs an autonomous agent loop that processes natural language commands through an LLM, converts them into structured actions, and executes them using Minecraft's game mechanics. The system uses a direct action execution model optimized for real-time gameplay rather than a traditional ReAct framework.
-
-**Core execution flow:**
-1. User input captured via GUI (press K)
-2. Task sent to TaskPlanner with conversation context
-3. LLM (Groq/OpenAI/Gemini) generates structured action plan
-4. ResponseParser extracts actions from LLM response
-5. ActionExecutor processes actions through specialized action classes
-6. Actions execute tick-by-tick to avoid freezing the game
-7. Results fed back into conversation memory for context
-
-### Core Components
-
-**LLM Integration** (`com.steve.ai.llm`)
-- **GeminiClient, GroqClient, OpenAIClient**: Pluggable LLM providers for agent reasoning
-- **TaskPlanner**: Orchestrates LLM calls with context (conversation history, world state, Steve capabilities)
-- **PromptBuilder**: Constructs prompts with available actions, examples, and formatting instructions
-- **ResponseParser**: Extracts structured action sequences from LLM responses
-
-**Action System** (`com.steve.ai.action`)
-- **ActionExecutor**: Tick-based action execution engine (prevents game freezing)
-- **BaseAction**: Abstract class for all actions (mine, build, move, combat, etc.)
-- **Task**: Data model for action parameters and metadata
-- **Available Actions**:
-  - MineBlockAction: Intelligent ore/block mining with pathfinding
-  - BuildStructureAction: Procedural and template-based building
-  - PlaceBlockAction: Single block placement with validation
-  - MoveToAction: Pathfinding-based movement
-  - AttackAction: Combat with target selection
-  - FollowAction: Player/entity following
-  - WaitAction: Controlled delays and synchronization
-
-**Structure Generation** (`com.steve.ai.structure`)
-- **StructureGenerators**: Procedural generation algorithms (houses, castles, towers, barns)
-- **StructureTemplateLoader**: NBT file loading from resources
-- **BlockPlacement**: Shared data structure for block positioning
-
-**Multi-Agent Collaboration** (`com.steve.ai.action`)
-- **CollaborativeBuildManager**: Server-side coordination for parallel building
-- **Spatial partitioning**: Automatically divides structures into non-overlapping sections
-- **Work distribution**: Assigns sections to available Steves
-- **Conflict prevention**: Atomic block placement with position tracking
-- **Dynamic rebalancing**: Reassigns work when agents finish early
-
-**Memory & Context** (`com.steve.ai.memory`)
-- **SteveMemory**: Per-agent conversation history and task context
-- **WorldKnowledge**: Tracks discovered resources, landmarks, and spatial data
-- **StructureRegistry**: Catalogs built structures for reference and avoidance
-
-**Code Execution** (`com.steve.ai.execution`)
-- **CodeExecutionEngine**: GraalVM JavaScript engine for LLM-generated scripts
-- **SteveAPI**: Safe API bridge exposing Minecraft actions to scripts
-- **Sandboxing**: Restricted environment preventing harmful operations
-
-### Key Design Decisions
-
-**Tick-Based Execution**
-Actions run incrementally across multiple game ticks rather than blocking. This prevents server freezes and maintains responsiveness. Each action's `tick()` method does minimal work per frame and tracks progress internally.
-
-**Direct Action Execution (Not Traditional ReAct)**
-While inspired by ReAct, we use direct action execution for real-time gameplay. The LLM generates complete action sequences upfront rather than iterative observe-think-act cycles. This reduces API calls and latency, critical for game responsiveness.
-
-**Multi-Agent Coordination**
-Collaborative builds use deterministic spatial partitioning. Structures are divided into rectangular sections based on agent count. Each Steve claims a section atomically, preventing conflicts. The manager is fully server-side using ConcurrentHashMap for thread safety.
-
-**Memory Management**
-Context windows are managed by pruning old messages while keeping recent exchanges and critical world state. Each LLM call includes: conversation history (last 10 exchanges), current task details, Steve's position/inventory, and known world features.
-
-### Integration with Minecraft
-
-**Entity Registration**
-Steves are custom EntityType registered via Forge's deferred registry system. They extend PathfinderMob for vanilla pathfinding integration and implement custom goals for AI behavior.
-
-**Event Hooks**
-- ServerStarting: Initialize collaborative build manager
-- ServerStopping: Cleanup active tasks and save state
-- ClientTick: GUI rendering and input handling
-
-**GUI Implementation**
-Custom overlay GUI activated with K key. Uses Minecraft's Screen class with custom rendering. Text input forwarded to TaskPlanner on submission.
-
-## Building from Source
-
-Steve AI now uses Maven as the primary build workflow for this MineMind
-migration branch. The old Gradle wrapper and build entry files have been
-removed from the active project.
-
-```bash
-git clone https://github.com/YuvDwi/Steve.git
-cd Steve
-mvn clean package
-```
-
-Output JAR will be in `target/`:
-
-```bash
-target/steve-ai-mod-1.0.0.jar
-```
-
-The Maven build prepares the Forge/Minecraft compile classpath during the
-build. On the first run it downloads the Minecraft 1.20.1 client/server jars
-and Mojang mappings, caches those downloads under the local Maven repository,
-compiles the mod, processes resources, runs tests, and packages the mod JAR.
-
-ForgeGradle's `runClient`/`runServer` tasks do not have a direct Maven
-replacement in this migration. For in-game testing, build with
-`mvn clean package`, then place the generated JAR in a Minecraft 1.20.1 Forge
-mods directory.
-
-**Project Structure:**
-```
-src/main/java/com/steve/ai/
-├── entity/          # Steve entity, spawning, lifecycle
-├── llm/             # LLM clients, prompt building, response parsing
-├── action/          # Action classes and collaborative build manager
-├── structure/       # Procedural generation and template loading
-├── memory/          # Context management and world knowledge
-├── execution/       # JavaScript code execution engine
-├── client/          # GUI overlay
-└── command/         # Minecraft commands (/steve spawn, etc)
-```
-
-## Contributing
-
-We welcome contributions! Here's how to get started:
-
-### Reporting Bugs
-
-1. Check [existing issues](https://github.com/YuvDwi/Steve/issues) first
-2. Include:
-   - Minecraft/Forge/Steve AI versions
-   - Steps to reproduce
-   - Expected vs actual behavior
-   - Logs from `logs/latest.log`
-
-### Submitting Code
-
-1. **Fork and clone**
-   ```bash
-   git clone https://github.com/YourUsername/Steve.git
-   cd Steve
-   ```
-
-2. **Create feature branch**
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-3. **Make changes**
-   - Follow code style (4-space indent, JavaDoc for public APIs)
-   - Test with `mvn clean package`
-
-4. **Submit PR**
-   - Clear commit messages
-   - Describe changes and reasoning
-   - Link related issues
-
-### Code Style
-
-- **Classes**: PascalCase
-- **Methods/Variables**: camelCase
-- **Constants**: UPPER_SNAKE_CASE
-- **Indentation**: 4 spaces
-- **Line length**: Max 120 characters
-- **Comments**: JavaDoc for public methods
-
-**Adding New Actions:**
-1. Extend `BaseAction` in `com.steve.ai.action.actions`
-2. Implement `tick()`, `isComplete()`, `onCancel()`
-3. Update `PromptBuilder.java` to inform LLM about new action
-4. Add example usage in prompt template
+When autonomous mode is enabled, the tick loop only runs while the existing
+`ActionExecutor` is idle. It does not call an LLM, does not block the Minecraft
+main thread with network requests, and does not spam chat.
 
 ## Configuration
 
-Edit `config/steve-common.toml`:
+Example:
 
 ```toml
-[llm]
-provider = "groq"  # Options: openai, groq, gemini
+[ai]
+provider = "groq"
 
 [openai]
-apiKey = "sk-..."
-model = "gpt-3.5-turbo"
-maxTokens = 1000
+apiKey = ""
+model = "gpt-4-turbo-preview"
+maxTokens = 8000
 temperature = 0.7
 
-[groq]
-apiKey = "gsk_..."
-model = "llama3-70b-8192"
-maxTokens = 1000
-
-[gemini]
-apiKey = "AI..."
-model = "gemini-1.5-flash"
-maxTokens = 1000
+[behavior]
+actionTickDelay = 20
+enableChatResponses = true
+maxActiveSteves = 10
 
 [minemind]
 autonomousModeDefault = false
@@ -291,55 +128,59 @@ maxPlanningSteps = 3
 useLlmPlanner = false
 ```
 
-MineMind options are disabled by default so the original Steve command mode and
-GUI task mode keep their current behavior unless you explicitly opt in with the
-config and `/steve minemind ...` commands.
+All MineMind options default to disabled or rule-based behavior so existing
+Steve command and GUI workflows keep their current behavior unless explicitly
+enabled.
 
-**Performance Tips:**
-- Use Groq for fastest inference (recommended for gameplay)
-- GPT-4 for better planning but higher latency
-- Lower temperature (0.5-0.7) for more deterministic actions
+## Current Architecture
 
-## Known Issues
+Main packages:
 
-**The agents are only as smart as the LLM.** GPT-3.5 works but makes occasional weird decisions. GPT-4 is noticeably better at multi-step planning.
+```text
+src/main/java/com/steve/ai/
+  action/       Tick-based action execution and action classes
+  client/       K-key GUI overlay
+  command/      Minecraft commands
+  config/       Forge config definitions
+  entity/       Steve entity, spawning, lifecycle, MineMind tick hook
+  llm/          Existing LLM clients, prompt building, response parsing
+  memory/       Steve memory and world knowledge
+  minemind/     MineMind state, observation, goal selection, autonomous loop
+  plugin/       Action plugin registry
+  structure/    Structure templates and procedural generation
+```
 
-**No crafting yet.** Agents can mine and place blocks but can't craft tools. We're working on it.
+MineMind currently reuses:
 
-**Actions are synchronous.** If a Steve is mining, it can't do anything else until done. Planning to add proper async execution.
+- `SteveEntity` for entity lifecycle
+- `ActionExecutor` and existing `Task` objects for execution
+- `WorldKnowledge` for bounded observation
+- `SteveMemory` for recent actions, failures, and observation summaries
+- Existing command registration under `/steve`
 
-**Memory resets on restart.** Right now context only persists during a play session. We're adding persistent memory with a vector DB.
+## Validation
 
-## What's Next
+Every MineMind stage must pass:
 
-Planned features:
-- Crafting system (agents make their own tools)
-- Voice commands via Whisper API
-- Vector database for long-term memory
-- Async action execution for multitasking
-- More building templates and procedural generation
-- Enhanced pathfinding for complex terrain
+```bash
+mvn clean package
+```
 
-Goal is to make this actually useful for survival gameplay, not just a tech demo.
+The build must produce `target/steve-ai-mod-1.0.0.jar`.
 
-## Why We Made This
+## Roadmap
 
-We wanted to see if the Cursor model could work outside of coding. Turns out it translates pretty well. Same principles: deep environment integration, clear action primitives, persistent context.
+Planned phases continue from the staged MineMind goal document:
 
-Minecraft is actually a good testbed for agent research. Complex enough to be interesting, constrained enough that agents can actually succeed.
-
-Plus it's just fun watching AIs build castles while you explore.
+- Chat guidance and player instruction memory
+- Longer-term persisted memory
+- DeepSeek provider support
+- Safe LLM planner with validation and rule fallback
+- Multi-agent roles, task board, shared memory, and communication
+- Community-level autonomous strategy
 
 ## Credits
 
-- OpenAI/Groq/Google for LLM APIs
-- Minecraft Forge for the modding framework
-- LangChain/AutoGPT for agent architecture inspiration
-
-## License
-
-MIT
-
-## Issues
-
-Found a bug? Open an issue: https://github.com/YuvDwi/Steve/issues
+MineMind is based on the Steve Minecraft AI mod and preserves its original
+command, GUI, LLM, action, memory, and multi-agent foundations while adding the
+new autonomous community simulation features in phases.

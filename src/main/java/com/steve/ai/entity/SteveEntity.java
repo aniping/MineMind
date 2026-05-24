@@ -3,6 +3,7 @@ package com.steve.ai.entity;
 import com.steve.ai.action.ActionExecutor;
 import com.steve.ai.config.SteveConfig;
 import com.steve.ai.memory.SteveMemory;
+import com.steve.ai.minemind.MineMindAutonomousController;
 import com.steve.ai.minemind.MineMindAgentState;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -28,6 +29,7 @@ public class SteveEntity extends PathfinderMob {
     private String steveName;
     private SteveMemory memory;
     private MineMindAgentState mineMindState;
+    private MineMindAutonomousController mineMindAutonomousController;
     private ActionExecutor actionExecutor;
     private int tickCounter = 0;
     private boolean isFlying = false;
@@ -39,6 +41,7 @@ public class SteveEntity extends PathfinderMob {
         this.memory = new SteveMemory(this);
         this.mineMindState = new MineMindAgentState(SteveConfig.MINEMIND_AUTONOMOUS_MODE_DEFAULT.get());
         this.actionExecutor = new ActionExecutor(this);
+        this.mineMindAutonomousController = new MineMindAutonomousController(this);
         this.setCustomNameVisible(true);
         
         this.isInvulnerable = true;
@@ -71,6 +74,7 @@ public class SteveEntity extends PathfinderMob {
         super.tick();
         
         if (!this.level().isClientSide) {
+            mineMindAutonomousController.tick();
             actionExecutor.tick();
         }
     }

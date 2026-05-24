@@ -135,6 +135,52 @@ public class MineMindObservation {
         );
     }
 
+    static MineMindObservation syntheticForTesting(
+            String steveName,
+            String position,
+            float health,
+            float maxHealth,
+            String hunger,
+            String dimension,
+            long dayTime,
+            boolean night,
+            String biome,
+            String nearbyPlayers,
+            String friendlyEntities,
+            String hostileEntities,
+            String nearbyBlocks,
+            String nearbyResources,
+            String inventory,
+            String currentAction,
+            int queuedTaskCount,
+            String currentGoal,
+            String recentFailures,
+            DangerLevel dangerLevel,
+            List<String> dangerReasons) {
+        return new MineMindObservation(
+            steveName,
+            position,
+            health,
+            maxHealth,
+            hunger,
+            dimension,
+            dayTime,
+            night,
+            biome,
+            nearbyPlayers,
+            friendlyEntities,
+            hostileEntities,
+            nearbyBlocks,
+            nearbyResources,
+            inventory,
+            currentAction,
+            queuedTaskCount,
+            currentGoal,
+            recentFailures,
+            dangerLevel,
+            dangerReasons);
+    }
+
     public String toCommandSummary() {
         return "Observation for " + steveName
             + ": pos=" + position
@@ -153,6 +199,16 @@ public class MineMindObservation {
             + ", queuedTasks=" + queuedTaskCount
             + ", goal=" + currentGoal
             + ", failures=" + recentFailures;
+    }
+
+    public String toMemorySummary() {
+        return "pos=" + position
+            + ", health=" + formatHealth()
+            + ", time=" + (night ? "night" : "day")
+            + ", biome=" + biome
+            + ", danger=" + dangerLevel
+            + ", resources=" + nearbyResources
+            + ", goal=" + currentGoal;
     }
 
     public DangerLevel getDangerLevel() {
