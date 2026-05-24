@@ -1,13 +1,29 @@
 [ai]
-    # AI provider to use: groq, openai, or gemini
-    provider = "groq"
+    # AI provider to use: deepseek, groq, openai, or gemini
+    provider = "deepseek"
 
-[openai]
-    # API key for the selected provider. Do not commit real keys.
+[deepseek]
+    # DeepSeek API key. Do not commit real keys.
     apiKey = ""
 
-    # Model name for the selected provider
-    model = "gpt-4-turbo-preview"
+    # OpenAI-compatible DeepSeek API base URL
+    baseUrl = "https://api.deepseek.com"
+
+    # Common options: deepseek-chat, deepseek-reasoner
+    model = "deepseek-chat"
+
+    # Maximum tokens per DeepSeek request
+    maxTokens = 4000
+
+    # Temperature (0.0-2.0, lower is more deterministic)
+    temperature = 0.7
+
+[openai]
+    # Optional fallback/provider-specific API key. Do not commit real keys.
+    apiKey = ""
+
+    # Model name for OpenAI-compatible fallback providers
+    model = ""
 
     # Maximum tokens per API request
     maxTokens = 8000

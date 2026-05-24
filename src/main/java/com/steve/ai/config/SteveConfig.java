@@ -7,6 +7,11 @@ public class SteveConfig {
     public static final ForgeConfigSpec.ConfigValue<String> AI_PROVIDER;
     public static final ForgeConfigSpec.ConfigValue<String> OPENAI_API_KEY;
     public static final ForgeConfigSpec.ConfigValue<String> OPENAI_MODEL;
+    public static final ForgeConfigSpec.ConfigValue<String> DEEPSEEK_API_KEY;
+    public static final ForgeConfigSpec.ConfigValue<String> DEEPSEEK_BASE_URL;
+    public static final ForgeConfigSpec.ConfigValue<String> DEEPSEEK_MODEL;
+    public static final ForgeConfigSpec.IntValue DEEPSEEK_MAX_TOKENS;
+    public static final ForgeConfigSpec.DoubleValue DEEPSEEK_TEMPERATURE;
     public static final ForgeConfigSpec.IntValue MAX_TOKENS;
     public static final ForgeConfigSpec.DoubleValue TEMPERATURE;
     public static final ForgeConfigSpec.IntValue ACTION_TICK_DELAY;
@@ -27,20 +32,44 @@ public class SteveConfig {
         builder.comment("AI API Configuration").push("ai");
         
         AI_PROVIDER = builder
-            .comment("AI provider to use: 'groq' (FASTEST, FREE), 'openai', or 'gemini'")
-            .define("provider", "groq");
+            .comment("AI provider to use: 'deepseek', 'groq', 'openai', or 'gemini'")
+            .define("provider", "deepseek");
         
         builder.pop();
 
-        builder.comment("OpenAI/Gemini API Configuration (same key field used for both)").push("openai");
+        builder.comment("DeepSeek API Configuration").push("deepseek");
+
+        DEEPSEEK_API_KEY = builder
+            .comment("DeepSeek API key. Do not commit real keys.")
+            .define("apiKey", "");
+
+        DEEPSEEK_BASE_URL = builder
+            .comment("DeepSeek OpenAI-compatible API base URL")
+            .define("baseUrl", "https://api.deepseek.com");
+
+        DEEPSEEK_MODEL = builder
+            .comment("DeepSeek model to use, such as deepseek-chat or deepseek-reasoner")
+            .define("model", "deepseek-chat");
+
+        DEEPSEEK_MAX_TOKENS = builder
+            .comment("Maximum tokens per DeepSeek request")
+            .defineInRange("maxTokens", 4000, 100, 65536);
+
+        DEEPSEEK_TEMPERATURE = builder
+            .comment("DeepSeek temperature")
+            .defineInRange("temperature", 0.7, 0.0, 2.0);
+
+        builder.pop();
+
+        builder.comment("Optional legacy provider API Configuration (used only when provider is openai, groq, or gemini)").push("openai");
         
         OPENAI_API_KEY = builder
-            .comment("Your OpenAI API key (required)")
+            .comment("Optional legacy provider API key. DeepSeek uses the [deepseek] section.")
             .define("apiKey", "");
         
         OPENAI_MODEL = builder
-            .comment("OpenAI model to use (gpt-4, gpt-4-turbo-preview, gpt-3.5-turbo)")
-            .define("model", "gpt-4-turbo-preview");
+            .comment("Optional model for the openai provider. Set this explicitly before using provider=openai.")
+            .define("model", "");
         
         MAX_TOKENS = builder
             .comment("Maximum tokens per API request")

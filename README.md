@@ -17,16 +17,19 @@ Current MineMind status:
 - The current autonomous loop observes the world, records a bounded memory
   summary, selects a rule goal, converts it to existing Steve tasks, and falls
   back to a bounded wait task when no safe task is available.
-- DeepSeek and LLM-based MineMind planning are planned later phases and are not
-  required for the current rule-based autonomous loop.
+- Players can address a named Steve in chat for status questions, lightweight
+  guidance, and explicit task handoff when chat guidance is enabled.
+- DeepSeek is the preferred LLM provider for command/GUI task planning.
+- LLM-based MineMind autonomous planning is a later phase; the current
+  autonomous loop remains rule-based.
 
 ## Requirements
 
 - Minecraft 1.20.1 with Forge
 - Java 17
 - Maven
-- An LLM API key only if you use the original natural language command or GUI
-  task mode
+- A DeepSeek API key only if you use the original natural language command or
+  GUI task mode
 
 Do not commit API keys. Keep keys in local config or pass them at runtime.
 
@@ -66,12 +69,11 @@ Maven is the sole build path in this branch.
 
 ### Dedicated Server Smoke Test
 
-Use a Forge server that matches the mod target: Minecraft `1.20.1`, Forge
-`47.2.0`.
+Use a Forge 47.x server for Minecraft `1.20.1`. The compile-time Forge version
+is recorded in `pom.xml`; the mod metadata accepts Forge `[47,)`.
 
 1. Build with `mvn clean package`.
-2. Install a Forge `1.20.1-47.2.0` dedicated server in a separate run
-   directory.
+2. Install a Forge 1.20.1 dedicated server in a separate run directory.
 3. Accept the Minecraft EULA for that server directory.
 4. Copy `target/steve-ai-mod-1.0.0.jar` into the server `mods` directory.
 5. Copy or adapt `config/steve-common.toml.example` into the server `config`
@@ -83,10 +85,11 @@ Use a Forge server that matches the mod target: Minecraft `1.20.1`, Forge
 ```
 
 If the Forge installer did not create `run.bat`, use the generated Forge args
-file instead:
+file instead. Replace `<forge-full-version>` with the actual directory name
+under `libraries/net/minecraftforge/forge`, such as `1.20.1-47.4.20`:
 
 ```powershell
-java @user_jvm_args.txt @libraries/net/minecraftforge/forge/1.20.1-47.2.0/win_args.txt nogui
+java @user_jvm_args.txt @libraries/net/minecraftforge/forge/<forge-full-version>/win_args.txt nogui
 ```
 
 Then join the server from a Minecraft 1.20.1 Forge client with the same mod JAR
@@ -155,11 +158,18 @@ Example:
 
 ```toml
 [ai]
-provider = "groq"
+provider = "deepseek"
+
+[deepseek]
+apiKey = ""
+baseUrl = "https://api.deepseek.com"
+model = "deepseek-chat"
+maxTokens = 4000
+temperature = 0.7
 
 [openai]
 apiKey = ""
-model = "gpt-4-turbo-preview"
+model = ""
 maxTokens = 8000
 temperature = 0.7
 
@@ -245,9 +255,7 @@ when Bob is idle.
 
 Planned phases continue from the staged MineMind goal document:
 
-- Chat guidance and player instruction memory
 - Longer-term persisted memory
-- DeepSeek provider support
 - Safe LLM planner with validation and rule fallback
 - Multi-agent roles, task board, shared memory, and communication
 - Community-level autonomous strategy
